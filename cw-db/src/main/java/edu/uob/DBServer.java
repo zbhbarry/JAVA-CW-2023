@@ -46,18 +46,26 @@ public class DBServer {
     public String handleCommand(String command) {
         dbFile.setRoot(storageFolderPath);
         // TODO implement your server logic here
-        try{
-            command = command.trim();
-            if (!command.endsWith(";")) {
-                return "[ERROR]: The end of the command must have ';'";
-            }
-            DBTokenizer tokenizer = new DBTokenizer();
-            ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
-            DBParser dbParser = new DBParser(dbFile, tokens);
-            return dbParser.getMessage();
-        } catch (Exception e){
-            return "[ERROR]: "+e.getMessage();
+        command = command.trim();
+        if (!command.endsWith(";")) {
+            return "[ERROR]: The end of the command must have ';'";
         }
+        DBTokenizer tokenizer = new DBTokenizer();
+        ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
+        DBParser dbParser = new DBParser(dbFile, tokens);
+        return dbParser.getMessage();
+//        try{
+//            command = command.trim();
+//            if (!command.endsWith(";")) {
+//                return "[ERROR]: The end of the command must have ';'";
+//            }
+//            DBTokenizer tokenizer = new DBTokenizer();
+//            ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
+//            DBParser dbParser = new DBParser(dbFile, tokens);
+//            return dbParser.getMessage();
+//        } catch (Exception e){
+//            return "[ERROR]: "+e.getMessage();
+//        }
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===

@@ -49,23 +49,20 @@ public class DBTable {
     }
 
     public String toString(ArrayList<Integer> columnsIndex, ArrayList<Integer> rowsIndex){
-        StringBuilder result = new StringBuilder();
-        ArrayList<String> line = new ArrayList<>();
-        for (Integer index : columnsIndex) {
-            if (index == -1){
-                line.add("id");
+        if (rowsIndex == null){
+            StringBuilder result = new StringBuilder();
+            ArrayList<String> line = new ArrayList<>();
+            for (Integer index : columnsIndex) {
+                if (index == -1){
+                    line.add("id");
+                }
+                if(index >= 0 && index < columns.size()) {
+                    line.add(columns.get(index).getColumnName());
+                }
             }
-            if(index >= 0 && index < columns.size()) {
-                line.add(columns.get(index).getColumnName());
-            }
-        }
-        result.append(String.join("\t",line));
-        // 添加行数据
-        for (Integer rowIndex : rowsIndex) {
-            if(rowIndex >= 0 && rowIndex < rows.size()) {
+            for (DBRow row : rows) {
                 result.append("\n");
                 line = new ArrayList<>();
-                DBRow row = rows.get(rowIndex);
                 for (Integer colIndex : columnsIndex) {
                     if (colIndex == -1){
                         line.add(String.valueOf(row.getId()));
@@ -76,8 +73,38 @@ public class DBTable {
                 }
                 result.append(String.join("\t",line));
             }
+            return result.toString();
+        }else {
+            StringBuilder result = new StringBuilder();
+            ArrayList<String> line = new ArrayList<>();
+            for (Integer index : columnsIndex) {
+                if (index == -1){
+                    line.add("id");
+                }
+                if(index >= 0 && index < columns.size()) {
+                    line.add(columns.get(index).getColumnName());
+                }
+            }
+            result.append(String.join("\t",line));
+            // 添加行数据
+            for (Integer rowIndex : rowsIndex) {
+                if(rowIndex >= 0 && rowIndex < rows.size()) {
+                    result.append("\n");
+                    line = new ArrayList<>();
+                    DBRow row = rows.get(rowIndex);
+                    for (Integer colIndex : columnsIndex) {
+                        if (colIndex == -1){
+                            line.add(String.valueOf(row.getId()));
+                        }
+                        if(colIndex >= 0 && colIndex < row.getDataValues().size()) {
+                            line.add(row.getDataValues().get(colIndex));
+                        }
+                    }
+                    result.append(String.join("\t",line));
+                }
+            }
+            return result.toString();
         }
-        return result.toString();
     }
 
 

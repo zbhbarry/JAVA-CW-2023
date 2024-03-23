@@ -305,6 +305,13 @@ public class DBParser {
         ArrayList<Integer> columnsIndex = new ArrayList<Integer>();
         List<DBColumn> columns = table.getColumns();
         for(String colNeed : columnName){
+            if(colNeed.equalsIgnoreCase("*")){
+                columnsIndex.add(-1);
+                for(int i =0 ; i < columns.size(); i++){
+                    columnsIndex.add(i);
+                }
+                break;
+            }
             if(colNeed.equalsIgnoreCase("id")){
                 columnsIndex.add(-1);
                 continue;
@@ -463,12 +470,28 @@ public class DBParser {
 //        }
 //        ArrayList<String> conditions = condCommand();
 //        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
-//        table.updateValue(columnsIndex, rowsIndex);
+//        table.updateValue(columnsIndex, rowsIndex, valNew);
         this.message = "[OK]";
     }
 
     private void deleteCommand() {
-
+//        dbFile.isUseDatabase();
+//        if(!getCurrentToken().equalsIgnoreCase("FROM")){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
+//        String tbName = getCurrentToken();
+//        System.out.println(tbName);
+//        if(!dbFile.isTableFile(tbName)){
+//            throw new IllegalArgumentException("Table doesn't existed.");
+//        }
+//        DBTable table = dbFile.readTableFromFile(tbName);
+//        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
+//        ArrayList<String> conditions = condCommand();
+//        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
+//        table.removeRow(rowsIndex);
+        this.message = "[OK]";
     }
 
     private void joinCommand() {
