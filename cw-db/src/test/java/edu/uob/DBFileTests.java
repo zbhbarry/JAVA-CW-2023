@@ -36,12 +36,17 @@ public class DBFileTests {
     }
 
     @Test
-    public void testCreateAndDeleteDatabase(){
+    public void testIsDatabaseFolder(){
+        assertFalse(dbFile.isDatabaseFolder("markbook"));
+        dbFile.createDatabaseFolder("markbook");
+        assertTrue(dbFile.isDatabaseFolder("markbook"));
         dbFile.deleteDatabaseFolder("markbook");
-        assertTrue(dbFile.createDatabaseFolder("markbook"));
-        assertFalse(dbFile.createDatabaseFolder("markbook"));
-        assertTrue(dbFile.deleteDatabaseFolder("markbook"));
-        assertFalse(dbFile.deleteDatabaseFolder("markbook"));
+    }
+
+    @Test
+    public void testCreateAndDeleteDatabase(){
+        dbFile.createDatabaseFolder("markbook");
+        dbFile.deleteDatabaseFolder("markbook");
         assertEquals(dbFile.getDatabaseFolder(),"");
     }
 
@@ -63,7 +68,7 @@ public class DBFileTests {
         DBTable newTable = dbFile.readTableFromFile("mark");
         assertEquals(newTable.getTableName(), "mark");
         assertEquals(newTable.columnsToString(), "id\tname\tmark");
-        assertTrue(dbFile.deleteTableFile(newTable));
-        assertTrue(dbFile.deleteDatabaseFolder("markbook"));
+        dbFile.deleteTableFile("mark");
+        dbFile.deleteDatabaseFolder("markbook");
     }
 }
