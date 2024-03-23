@@ -9,9 +9,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DBFile {
-    private final String extension = ".tab";
+    // Handles file operations for databases and tables.
+    private final String extension = ".tab"; // Default file extension for table files.
     private String root = "databases";
-    private String databaseFolder;
+    private String databaseFolder; // The current database in use.
 
     public void setRoot(String root) {
         this.root = root;
@@ -37,24 +38,28 @@ public class DBFile {
         }
     }
 
+    // Checks if a database folder exists.
     public Boolean isDatabaseFolder(String databaseName){
         String databasePath = getDatabasePath(databaseName);
         File databaseFolderOpen = new File(databasePath);
         return databaseFolderOpen.exists();
     }
 
+    // Ensures a database has been specified before using a table.
     public void isUseDatabase(){
         if (Objects.equals(databaseFolder, "")){
             throw new IllegalArgumentException("Database must be specified before using table.");
         }
     }
 
+    // Checks if a table file exists.
     public Boolean isTableFile(String tableName) {
         String tablePath = getTablePath(tableName);
         File tableFileOpen = new File(tablePath);
         return tableFileOpen.exists();
     }
 
+    // Creates a database folder.
     public void createDatabaseFolder(String databaseName){
         String databasePath = getDatabasePath(databaseName);
         File databaseFolderOpen = new File(databasePath);
@@ -63,6 +68,7 @@ public class DBFile {
         }
     }
 
+    // Deletes a database folder.
     public void deleteDatabaseFolder(String databaseName){
         String databasePath = getDatabasePath(databaseName);
         File databaseFolderOpen = new File(databasePath);
@@ -77,6 +83,7 @@ public class DBFile {
         return getDatabasePath(databaseFolder) + File.separator + tableName.toLowerCase()+extension;
     }
 
+    // Creates a new table file and initializes it with column names.
     public void createTableFile(String tableName, ArrayList<String> attributeList){
         String tablePath = getTablePath(tableName);
         File tableFileOpen = new File(tablePath);
@@ -92,6 +99,7 @@ public class DBFile {
         }
     }
 
+    // Deletes a table file.
     public void deleteTableFile(String tableName){
         String tablePath = getTablePath(tableName);
         File tableFileOpen = new File(tablePath);
@@ -100,6 +108,7 @@ public class DBFile {
         }
     }
 
+    // Reads a table from its file and constructs a DBTable object.
     public DBTable readTableFromFile(String tableName){
         String tablePath = getTablePath(tableName);
         DBTable table = new DBTable(tableName);
@@ -127,6 +136,7 @@ public class DBFile {
         return table;
     }
 
+    // Saves a DBTable object to its corresponding file.
     public void saveTableToFile(DBTable table){
         String tablePath = getTablePath(table.getTableName());
         try {

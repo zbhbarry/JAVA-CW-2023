@@ -1,7 +1,8 @@
 package edu.uob;
 
 public class DBColumn {
-    private String columnName;
+    // Represents a column in a database table.
+    private String columnName; // The name of the column.
 
     public DBColumn(String columnName) {
         this.columnName = columnName;

@@ -3,6 +3,7 @@ package edu.uob;
 import java.util.ArrayList;
 
 public class DBRow {
+    // Represents a row in a database table.
     private int id;
     private ArrayList<String> dataValues;
 

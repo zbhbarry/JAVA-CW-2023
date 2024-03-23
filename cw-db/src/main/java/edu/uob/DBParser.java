@@ -3,6 +3,7 @@ package edu.uob;
 import java.util.*;
 
 public class DBParser {
+    // Further execution of the generated token
     private final ArrayList<String> keywords = new ArrayList<>(List.of("USE", "CREATE", "DATABASE", "TABLE",
             "DROP", "ALTER", "INSERT", "INTO", "VALUES", "SELECT", "FROM", "WHERE", "UPDATE", "SET", "DELETE", "JOIN",
             "ON", "ADD", "NULL"));
@@ -15,6 +16,7 @@ public class DBParser {
         return this.message;
     }
 
+    // Parses the command based on the first token and routes to the appropriate method.
     public DBParser(DBFile dbFile, ArrayList<String> tokens) {
         this.dbFile = dbFile;
         this.tokens = tokens;
@@ -44,6 +46,7 @@ public class DBParser {
         }
     };
 
+    //  Handle different operations separately
     private void useCommand() {
         String dbname = getCurrentToken();
         isKeyWord(dbname);
@@ -501,6 +504,7 @@ public class DBParser {
         }
     }
 
+    // Verifies if the current command has ended as expected
     private Boolean endCommand(){
         String currentToken = tokens.get(currentTokenIndex) ;
         if (Objects.equals(currentToken, ";")){

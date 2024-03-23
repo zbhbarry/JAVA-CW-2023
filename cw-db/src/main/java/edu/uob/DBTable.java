@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class DBTable {
+    // Represents a table within a database, holding both the structure (columns) and data (rows).
     private String tableName;
     private ArrayList<DBColumn> columns;
     private ArrayList<DBRow> rows;
@@ -32,6 +33,7 @@ public class DBTable {
         this.columns = columns;
     }
 
+    // Converts the list of columns to a string representation, separated by tabs.
     public String columnsToString(){
         StringBuilder stringColumns = new StringBuilder("id");
         for(DBColumn column : this.columns){
@@ -41,6 +43,7 @@ public class DBTable {
         return stringColumns.toString();
     }
 
+    // Converts the entire table (columns and rows) to a string representation.
     public String toString(){
         StringBuilder result = new StringBuilder(columnsToString());
         for(DBRow row: rows){
@@ -50,6 +53,7 @@ public class DBTable {
         return result.toString();
     }
 
+    // Converts specified columns and rows to a string representation, based on provided indices.
     public String toString(ArrayList<Integer> columnsIndex, ArrayList<Integer> rowsIndex){
         if (rowsIndex == null){
             StringBuilder result = new StringBuilder();
@@ -179,6 +183,7 @@ public class DBTable {
         }
     }
 
+    // Generates the next ID for a new row based on existing rows.
     public int getNextId() {
         if (rows.isEmpty()){
             return 1;

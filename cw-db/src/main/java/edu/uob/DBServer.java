@@ -47,17 +47,19 @@ public class DBServer {
         dbFile.setRoot(storageFolderPath);
         // TODO implement your server logic here
         try{
+            // Trim whitespace from the beginning and end of the command.
             command = command.trim();
+            // Check if the command ends with a semicolon, which is expected for SQL commands.
             if (!command.endsWith(";")) {
                 return "[ERROR]: The end of the command must have ';'";
             }
             DBTokenizer tokenizer = new DBTokenizer();
             ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
             DBParser dbParser = new DBParser(dbFile, tokens);
-            System.out.println(dbParser.getMessage());
+//            System.out.println(dbParser.getMessage());
             return dbParser.getMessage();
         } catch (Exception e){
-            System.out.println("[ERROR]: "+e.getMessage());
+//            System.out.println("[ERROR]: "+e.getMessage());
             return "[ERROR]: "+e.getMessage();
         }
     }
