@@ -1,12 +1,13 @@
 package edu.uob;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DBRow {
     private int id;
-    private List<String> dataValues;
+    private ArrayList<String> dataValues;
 
-    public DBRow(int id, List<String> dataValues) {
+    public DBRow(int id, ArrayList<String> dataValues) {
         this.id = id;
         this.dataValues = dataValues;
     }
@@ -15,11 +16,15 @@ public class DBRow {
         return id;
     }
 
-    public List<String> getDataValues() {
+    public ArrayList<String> getDataValues() {
         return dataValues;
     }
 
-    public void setDataValues(List<String> dataValues) {
+    public void setDataValues(ArrayList<String> dataValues) {
         this.dataValues = dataValues;
+    }
+
+    public String toString(){
+        return this.id + "\t" + String.join("\t", this.dataValues);
     }
 }
