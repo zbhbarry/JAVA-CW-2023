@@ -135,5 +135,4 @@ public class ExampleDBTests {
         sendCommandToServer("DROP TABLE marks;");
         sendCommandToServer("DROP DATABASE markbook;");
     }
-
 }

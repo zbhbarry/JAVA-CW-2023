@@ -56,10 +56,10 @@ public class DBServer {
             DBTokenizer tokenizer = new DBTokenizer();
             ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
             DBParser dbParser = new DBParser(dbFile, tokens);
-//            System.out.println(dbParser.getMessage());
+            System.out.println(dbParser.getMessage());
             return dbParser.getMessage();
         } catch (Exception e){
-//            System.out.println("[ERROR]: "+e.getMessage());
+            System.out.println("[ERROR]: "+e.getMessage());
             return "[ERROR]: "+e.getMessage();
         }
     }

@@ -108,6 +108,7 @@ public class DBParser {
     private ArrayList<String> attributeOrValueListCommand() {
         ArrayList<String> attrList = new ArrayList<String>();
         boolean inList = true;
+        Set<String> set = new HashSet<String>();
         if(!Objects.equals(getCurrentToken(), "(") || !Objects.equals(tokens.get(tokens.size() - 2), ")")){
             throw new IllegalArgumentException("Attributes list is not in () .");
         }else {
@@ -116,6 +117,10 @@ public class DBParser {
                 if(inList){
                     isKeyWord(attr);
                     attrList.add(attr);
+                    if(set.contains(attr)){
+                        throw new IllegalArgumentException("Attributes should not repeat.");
+                    }
+                    set.add(attr);
                     inList = false;
                 }else {
                     inList = true;
@@ -212,6 +217,9 @@ public class DBParser {
         }
         ArrayList<String> valueList = attributeOrValueListCommand();
         DBTable table = dbFile.readTableFromFile(tbName);
+        if(valueList.size() != table.getColumns().size()){
+            throw new IllegalArgumentException("Too much or less values;");
+        }
         if(endCommand()){
             DBRow row = new DBRow(table.getNextId(), valueList);
             table.addRow(row);
