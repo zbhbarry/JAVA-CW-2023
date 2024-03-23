@@ -117,6 +117,7 @@ public class ExampleDBTests {
         sendCommandToServer("SELECT * FROM marks WHERE name == 'Chris';");
         sendCommandToServer("DELETE FROM marks WHERE name == 'Sion';");
         sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("SELECT * FROM marks WHERE (pass == FALSE) AND (mark > 35);");
         sendCommandToServer("SELECT * FROM marks WHERE name LIKE 'i';");
         sendCommandToServer("SELECT id FROM marks WHERE pass == FALSE;");
         sendCommandToServer("SELECT name FROM marks WHERE mark>60;");
