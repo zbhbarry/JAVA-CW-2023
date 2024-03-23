@@ -38,6 +38,15 @@ public class DBTable {
         return stringColumns.toString();
     }
 
+//    public String selectColumnsToString(ArrayList<Integer> columnsIndex){
+//        StringBuilder stringColumns = new StringBuilder("id");
+//        for (int columnIndex: columnsIndex){
+//            for (int i = 0; i < this.columns.size(); i++) {
+//
+//            }
+//        }
+//    }
+
     public void addRow(DBRow dbRow){
         this.rows.add(dbRow);
     }

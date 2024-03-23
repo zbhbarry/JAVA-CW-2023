@@ -10,12 +10,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.nio.file.Files;
+import java.util.ArrayList;
 
 /** This class implements the DB server. */
 public class DBServer {
 
     private static final char END_OF_TRANSMISSION = 4;
     private String storageFolderPath;
+    DBFile dbFile = new DBFile();
 
     public static void main(String args[]) throws IOException {
         DBServer server = new DBServer();
@@ -43,7 +45,18 @@ public class DBServer {
     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
-        return "";
+        try{
+            command = command.trim();
+            if (!command.endsWith(";")) {
+                return "[ERROR]: The end of the command must have ';'";
+            }
+            DBTokenizer tokenizer = new DBTokenizer();
+            ArrayList<String> tokens = tokenizer.tokenizeCommand(command);
+            DBParser dbParser = new DBParser(dbFile, tokens);
+            return dbParser.getMessage();
+        } catch (Exception e){
+            return "[ERROR]: "+e.getMessage();
+        }
     }
 
     //  === Methods below handle networking aspects of the project - you will not need to change these ! ===
