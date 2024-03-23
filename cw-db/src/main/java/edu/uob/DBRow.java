@@ -15,7 +15,7 @@ public class DBRow {
     }
 
     public void addNull(){
-        dataValues.add(" ");
+        dataValues.add("");
     }
 
     public int getId() {
