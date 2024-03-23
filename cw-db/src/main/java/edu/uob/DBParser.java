@@ -38,6 +38,7 @@ public class DBParser {
     private String getCurrentToken(){
         if (currentTokenIndex < tokens.size()){
             currentTokenIndex++;
+            System.out.println(tokens.get(currentTokenIndex-1));
             return tokens.get(currentTokenIndex-1);
         } else {
             throw new IllegalArgumentException("Illegal Command length or format.");
@@ -123,6 +124,7 @@ public class DBParser {
                 attr = getCurrentToken();
             }
         }
+        System.out.println(attrList);
         return attrList;
     }
 
@@ -185,14 +187,12 @@ public class DBParser {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.dropColumn(attr);
         dbFile.saveTableToFile(table);
-        this.message = "[OK]";
     }
 
     private void alterAddCommand(String tbName, String attr) {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.addColumn(attr);
         dbFile.saveTableToFile(table);
-        this.message = "[OK]";
     }
 
     private void insertCommand() {
@@ -219,28 +219,28 @@ public class DBParser {
         }
     }
     private void selectCommand() {
-//        dbFile.isUseDatabase();
-//        ArrayList<String> columnName = columnListCommand();
-//
-//        String tbName = getCurrentToken();
-//        System.out.println(tbName);
-//        if(!dbFile.isTableFile(tbName)){
-//            throw new IllegalArgumentException("Table doesn't existed.");
-//        }
-//        DBTable table = dbFile.readTableFromFile(tbName);
-//        ArrayList<Integer> columnsIndex, rowsIndex;
-//        columnsIndex = getColumnsIndex(table, columnName);
-//        if(endCommand()){
-//            this.message = "[OK]\n" + table.toString(columnsIndex, null);
-//        }else {
-//            if(!getCurrentToken().equalsIgnoreCase("WHERE")){
-//                throw new IllegalArgumentException("Illegal command.");
-//            }
-//            ArrayList<String> conditions = condCommand();
-//            this.message = "[OK]\n" + table.toString(columnsIndex, rowsIndex);
-//        }
-    }
+        dbFile.isUseDatabase();
+        ArrayList<String> columnName = columnListCommand();
 
+        String tbName = getCurrentToken();
+        System.out.println(tbName);
+        if(!dbFile.isTableFile(tbName)){
+            throw new IllegalArgumentException("Table doesn't existed.");
+        }
+        DBTable table = dbFile.readTableFromFile(tbName);
+        ArrayList<Integer> columnsIndex, rowsIndex;
+        columnsIndex = getColumnsIndex(table, columnName);
+        if(endCommand()){
+            this.message = "[OK]\n" + table.toString(columnsIndex, null);
+        }else {
+            if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+                throw new IllegalArgumentException("Illegal command.");
+            }
+            ArrayList<String> conditions = condCommand();
+            rowsIndex = getRowsIndex(table, conditions);
+            this.message = "[OK]\n" + table.toString(columnsIndex, rowsIndex);
+        }
+    }
     private ArrayList<String> columnListCommand() {
         ArrayList<String> attrList = new ArrayList<String>();
         boolean inList = true;
@@ -282,6 +282,9 @@ public class DBParser {
         if(!cond.equals(";")){
             throw new IllegalArgumentException("Illegal command.");
         }
+        if(endCommand()){
+            throw new IllegalArgumentException("Illegal command.");
+        }
         if(conditions.size() == 3){
             if(!operater.contains(conditions.get(1)) ){
                 throw new IllegalArgumentException("Wrong operator.");
@@ -298,10 +301,170 @@ public class DBParser {
         return conditions;
     }
 
+    public ArrayList<Integer> getColumnsIndex(DBTable table, ArrayList<String> columnName) {
+        ArrayList<Integer> columnsIndex = new ArrayList<Integer>();
+        List<DBColumn> columns = table.getColumns();
+        for(String colNeed : columnName){
+            if(colNeed.equalsIgnoreCase("id")){
+                columnsIndex.add(-1);
+                continue;
+            }
+            isKeyWord(colNeed);
+            boolean isFind = false;
+            for(int i =0 ; i < columns.size(); i++){
+                DBColumn colExist = columns.get(i);
+                if(colNeed.equalsIgnoreCase(colExist.getColumnName())){
+                    columnsIndex.add(i);
+                    isFind = true;
+                }
+            }
+            if(!isFind){
+                throw new IllegalArgumentException("Attribute:" + colNeed +"is not found!");
+            }
+        }
+        return columnsIndex;
+    }
 
+    public ArrayList<Integer> getRowsIndex(DBTable table, ArrayList<String> conditions) {
+        ArrayList<Integer> rowsIndex = new ArrayList<Integer>();
+        List<DBColumn> columns = table.getColumns();
+        int columnsIndex = -1;
+
+        if(conditions.size() == 3){
+            String colNeed = conditions.get(0);
+            if(colNeed.equalsIgnoreCase("id")){
+                for(int i = 0; i < table.getRows().size(); i++){
+                    DBRow row = table.getRows().get(i);
+                    int id2Check = row.getId();
+                    int idNow = Integer.parseInt(conditions.get(2));
+                    switch (conditions.get(1)){
+                        case "==":
+                            if(id2Check == idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case ">":
+                            if(id2Check > idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "<":
+                            if(id2Check < idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case ">=":
+                            if(id2Check >= idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "<=":
+                            if(id2Check <= idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "!=":
+                            if(id2Check != idNow){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "LIKE":
+                            throw new IllegalArgumentException("Illegal operator for two number.");
+                        default:
+                            throw new IllegalArgumentException("Illegal command.");
+                    }
+                }
+            }else{
+                boolean isFind = false;
+                for(int i =0 ; i < columns.size(); i++){
+                    DBColumn colExist = columns.get(i);
+                    if(colNeed.equalsIgnoreCase(colExist.getColumnName())){
+                        columnsIndex = i;
+                        isFind = true;
+                    }
+                }
+                if(!isFind){
+                    throw new IllegalArgumentException("Attribute:" + colNeed +"is not found!");
+                }
+                for(int i = 0; i < table.getRows().size(); i++){
+                    DBRow row = table.getRows().get(i);
+                    String val2Check = row.getDataValues().get(columnsIndex);
+                    String valNow = conditions.get(2);
+                    switch (conditions.get(1)){
+                        case "==":
+                            if(val2Check.compareToIgnoreCase(valNow) == 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case ">":
+                            if(val2Check.compareToIgnoreCase(valNow) > 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "<":
+                            if(val2Check.compareToIgnoreCase(valNow) < 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case ">=":
+                            if(val2Check.compareToIgnoreCase(valNow) >= 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "<=":
+                            if(val2Check.compareToIgnoreCase(valNow) <= 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "!=":
+                            if(val2Check.compareToIgnoreCase(valNow) != 0){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        case "LIKE":
+                            if(val2Check.contains(valNow)){
+                                rowsIndex.add(i);
+                            }
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Illegal command.");
+                    }
+                }
+            }
+        }else{
+            throw new IllegalArgumentException("[OK]");
+        }
+        return rowsIndex;
+    }
 
     private void updateCommand() {
-
+//        dbFile.isUseDatabase();
+//
+//        String tbName = getCurrentToken();
+//        System.out.println(tbName);
+//        if(!dbFile.isTableFile(tbName)){
+//            throw new IllegalArgumentException("Table doesn't existed.");
+//        }
+//        DBTable table = dbFile.readTableFromFile(tbName);
+//        if(!getCurrentToken().equalsIgnoreCase("SET")){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
+//        String attr = getCurrentToken();
+//        ArrayList<String> attrList = new ArrayList<>();
+//        attrList.add(attr);
+//        ArrayList<Integer> columnsIndex = getColumnsIndex(table, attrList);
+//
+//        if(!getCurrentToken().equalsIgnoreCase("=")){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
+//        String valNew = getCurrentToken();
+//        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
+//        ArrayList<String> conditions = condCommand();
+//        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
+//        table.updateValue(columnsIndex, rowsIndex);
+        this.message = "[OK]";
     }
 
     private void deleteCommand() {

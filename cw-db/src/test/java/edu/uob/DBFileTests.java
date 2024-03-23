@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,8 +65,9 @@ public class DBFileTests {
         rowDataValues.add("65");
         DBRow row = new DBRow(table.getRows().size()+1, rowDataValues);
         table.addRow(row);
-        System.out.println(table.toString());
-        dbFile.saveTableToFile(table);
+        ArrayList<Integer> arrayList = new ArrayList<>(List.of(-1,0));
+        System.out.println(table.toString(arrayList,arrayList));
+//        dbFile.saveTableToFile(table);
 //        DBTable newTable = dbFile.readTableFromFile("mark");
 //        assertEquals(newTable.getTableName(), "mark");
 //        assertEquals(newTable.columnsToString(), "id\tname\tmark");

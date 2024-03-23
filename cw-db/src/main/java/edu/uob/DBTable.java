@@ -48,18 +48,38 @@ public class DBTable {
         return result.toString();
     }
 
-    public void compareColumn(){
-
+    public String toString(ArrayList<Integer> columnsIndex, ArrayList<Integer> rowsIndex){
+        StringBuilder result = new StringBuilder();
+        ArrayList<String> line = new ArrayList<>();
+        for (Integer index : columnsIndex) {
+            if (index == -1){
+                line.add("id");
+            }
+            if(index >= 0 && index < columns.size()) {
+                line.add(columns.get(index).getColumnName());
+            }
+        }
+        result.append(String.join("\t",line));
+        // 添加行数据
+        for (Integer rowIndex : rowsIndex) {
+            if(rowIndex >= 0 && rowIndex < rows.size()) {
+                result.append("\n");
+                line = new ArrayList<>();
+                DBRow row = rows.get(rowIndex);
+                for (Integer colIndex : columnsIndex) {
+                    if (colIndex == -1){
+                        line.add(String.valueOf(row.getId()));
+                    }
+                    if(colIndex >= 0 && colIndex < row.getDataValues().size()) {
+                        line.add(row.getDataValues().get(colIndex));
+                    }
+                }
+                result.append(String.join("\t",line));
+            }
+        }
+        return result.toString();
     }
 
-//    public String selectColumnsToString(ArrayList<Integer> columnsIndex){
-//        StringBuilder stringColumns = new StringBuilder("id");
-//        for (int columnIndex: columnsIndex){
-//            for (int i = 0; i < this.columns.size(); i++) {
-//
-//            }
-//        }
-//    }
 
     public void addRow(DBRow dbRow){
         this.rows.add(dbRow);
@@ -104,8 +124,6 @@ public class DBTable {
             row.delDataValue(delIndex);
         }
     }
-
-
 
     public void addColumn(String attr) {
         if (attr.equals("id")){
