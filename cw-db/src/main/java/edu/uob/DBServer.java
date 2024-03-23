@@ -44,6 +44,7 @@ public class DBServer {
     * <p>This method handles all incoming DB commands and carries out the required actions.
     */
     public String handleCommand(String command) {
+        dbFile.setRoot(storageFolderPath);
         // TODO implement your server logic here
         try{
             command = command.trim();

@@ -38,6 +38,10 @@ public class DBTable {
         return stringColumns.toString();
     }
 
+    public void compareColumn(){
+
+    }
+
 //    public String selectColumnsToString(ArrayList<Integer> columnsIndex){
 //        StringBuilder stringColumns = new StringBuilder("id");
 //        for (int columnIndex: columnsIndex){
@@ -69,5 +73,11 @@ public class DBTable {
         } else {
             return false;
         }
+    }
+
+    public void dropColumn(String attr) {
+    }
+
+    public void addColumn(String attr) {
     }
 }

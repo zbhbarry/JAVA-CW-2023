@@ -6,9 +6,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DBFile {
-    private final String root = "databases";
     private final String extension = ".tab";
+    private String root;
     private String databaseFolder;
+
+    public void setRoot(String root) {
+        this.root = root;
+    }
 
     public DBFile() {
         this.databaseFolder = "";
@@ -36,25 +40,63 @@ public class DBFile {
         return databaseFolderOpen.exists();
     }
 
-    public Boolean createDatabaseFolder(String databaseName){
-        String databasePath = getDatabasePath(databaseName);
-        File databaseFolderOpen = new File(databasePath);
-        return databaseFolderOpen.mkdir();
+    public void isUseDatabase(){
+        if (Objects.equals(databaseFolder, "")){
+            throw new IllegalArgumentException("Database must be specified before using table.");
+        }
     }
 
-    public Boolean deleteDatabaseFolder(String databaseName){
+    public Boolean isTableFile(String tableName) {
+        String tablePath = getTablePath(tableName);
+        System.out.println(tablePath);
+        File tableFileOpen = new File(tablePath);
+        System.out.println(tableFileOpen.exists());
+        return tableFileOpen.exists();
+    }
+
+    public void createDatabaseFolder(String databaseName){
         String databasePath = getDatabasePath(databaseName);
         File databaseFolderOpen = new File(databasePath);
-        Boolean deleteResult = databaseFolderOpen.delete();
-        if(deleteResult){
-            setDatabaseFolder("");
+        if (!databaseFolderOpen.mkdir()){
+            throw new RuntimeException("Database cannot be created.");
         }
-        return deleteResult;
+    }
+
+    public void deleteDatabaseFolder(String databaseName){
+        String databasePath = getDatabasePath(databaseName);
+        File databaseFolderOpen = new File(databasePath);
+        if (!databaseFolderOpen.delete()){
+            throw new RuntimeException("Database cannot be deleted.");
+        }
+        databaseFolder = "";
     }
 
 
     public String getTablePath(String tableName){
         return getDatabasePath(databaseFolder) + File.separator + tableName.toLowerCase()+extension;
+    }
+
+    public void createTableFile(String tableName, ArrayList<String> attributeList){
+        String tablePath = getTablePath(tableName);
+        File tableFileOpen = new File(tablePath);
+        try{
+            if(tableFileOpen.createNewFile()){
+                FileWriter tableFileWriter = new FileWriter(tableFileOpen);
+                tableFileWriter.write("id\t"+String.join("\t", attributeList));
+                tableFileWriter.flush();
+                tableFileWriter.close();
+            }
+        }catch (IOException ioe){
+            throw new RuntimeException("The table file cannot be created, please check the permissions.");
+        }
+    }
+
+    public void deleteTableFile(String tableName){
+        String tablePath = getTablePath(tableName);
+        File tableFileOpen = new File(tablePath);
+        if (!tableFileOpen.delete()){
+            throw new RuntimeException("Table cannot be deleted.");
+        }
     }
 
     public DBTable readTableFromFile(String tableName){
@@ -102,11 +144,5 @@ public class DBFile {
             ioe.printStackTrace();
         }
         return false;
-    }
-
-    public Boolean deleteTableFile(DBTable table){
-        String tablePath = getTablePath(table.getTableName());
-        File tableFileOpen = new File(tablePath);
-        return tableFileOpen.delete();
     }
 }
