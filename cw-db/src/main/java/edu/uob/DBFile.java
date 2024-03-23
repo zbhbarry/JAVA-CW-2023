@@ -1,108 +1,112 @@
 package edu.uob;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class DBFile {
-    private String root = "databases";
-    private String extension = ".tab";
-    public String readTable(String tableName){
-        try{
-            String tablePath = root + File.separator + tableName.toLowerCase()+extension;
-            File tableFileOpen = new File(tablePath);
-            BufferedReader tableReader = new BufferedReader(new FileReader(tableFileOpen));
+    private final String root = "databases";
+    private final String extension = ".tab";
+    private String databaseFolder;
 
+    public DBFile() {
+        this.databaseFolder = "";
+    }
+
+    public String getDatabaseFolder() {
+        return databaseFolder;
+    }
+
+    public void setDatabaseFolder(String databaseFolder) {
+        this.databaseFolder = databaseFolder;
+    }
+
+    public String getDatabasePath(String databaseName){
+        if(Objects.equals(databaseName, "")){
+            return root;
+        }else {
+            return root + File.separator + databaseName.toLowerCase();
+        }
+    }
+
+    public Boolean isDatabaseFolder(String databaseName){
+        String databasePath = getDatabasePath(databaseName);
+        File databaseFolderOpen = new File(databasePath);
+        return databaseFolderOpen.exists();
+    }
+
+    public Boolean createDatabaseFolder(String databaseName){
+        String databasePath = getDatabasePath(databaseName);
+        File databaseFolderOpen = new File(databasePath);
+        return databaseFolderOpen.mkdir();
+    }
+
+    public Boolean deleteDatabaseFolder(String databaseName){
+        String databasePath = getDatabasePath(databaseName);
+        File databaseFolderOpen = new File(databasePath);
+        Boolean deleteResult = databaseFolderOpen.delete();
+        if(deleteResult){
+            setDatabaseFolder("");
+        }
+        return deleteResult;
+    }
+
+
+    public String getTablePath(String tableName){
+        return getDatabasePath(databaseFolder) + File.separator + tableName.toLowerCase()+extension;
+    }
+
+    public DBTable readTableFromFile(String tableName){
+        String tablePath = getTablePath(tableName);
+        DBTable table = new DBTable(tableName);
+        File tableFileOpen = new File(tablePath);
+        try(BufferedReader tableReader = new BufferedReader(new FileReader(tableFileOpen))){
+            String firstLine = tableReader.readLine();
+            String[] rawColumnNames = firstLine.split("[\t ]");
+            ArrayList<DBColumn> columns = new ArrayList<>();
+            for (String columnName : rawColumnNames) {
+                if (!columnName.equalsIgnoreCase("id")) {
+                    columns.add(new DBColumn(columnName));
+                }
+            }
+            table.setColumns(columns);
             String currentLine;
             while ((currentLine = tableReader.readLine()) != null) {
-                System.out.println(currentLine);
+                String[] rowValues = currentLine.split("[\t ]");
+                ArrayList<String> rowDataValues = new ArrayList<>(Arrays.asList(rowValues).subList(1, rowValues.length));
+                DBRow row = new DBRow(Integer.parseInt(rowValues[0]), rowDataValues);
+                table.addRow(row);
             }
         }catch(IOException ioe){
             ioe.printStackTrace();
         }
-        return "";
+        return table;
     }
-    public static void main(String[] args) {
-//        DBFile dbFile = new DBFile();
-//        dbFile.readTable("people");
-//        String header = "id Name Age Email";
-//        String[] parts = header.split("[\t ]");
-//        DBColumn[] columns = new DBColumn[parts.length - 1];
-//        int index = 0;
-//        for (String part : parts) {
-//            if (!part.equalsIgnoreCase("id")) {
-//                columns[index++] = new DBColumn(part);
-//            }
-//        }
-//
-//        // 输出结果，验证是否正确创建了Column对象数组
-//        for (DBColumn column : columns) {
-//            System.out.println(column.getColumnName());
-//        }
-//        File documentFolder = new File("databases");
-//        File[] documents = documentFolder.listFiles();
-//        System.out.println(Arrays.toString(documents));
-//
-//        System.out.println(documentFolder.isDirectory());
-//
-//        String name = "src" + File.separator + "main";
-//        File fileToOpen = new File(name);
-//        if(fileToOpen.exists()){
-//            File[] documents2 = fileToOpen.listFiles();
-//            System.out.println(Arrays.toString(documents2));
-//        }
-//
-//        String name2 = "test.tab";
-//        File fileToOpen2 = new File(name2);
-//        if(!fileToOpen2.exists()){
-//            System.out.println(fileToOpen2.createNewFile());
-//        }
-//
-//        String dirName = "email";
-//        File emailFolder = new File(dirName);
-//        if(!emailFolder.exists()){
-//            System.out.println(emailFolder.mkdir());
-//        }
-//
-//        String fileName = dirName + File.separator + "cv.txt";
-//        File cvFile =new File(fileName);
-//        if(!cvFile.exists()){
-//            FileWriter writer = new FileWriter(cvFile);
-//            writer.write("Hello\n");
-//            writer.write('a');
-//            writer.flush();
-//            writer.close();
-//        }
-//
-//        String readFile = dirName + File.separator + "cv.txt";
-//        File readFileOpen = new File(readFile);
-//        FileReader reader = new FileReader(readFileOpen);
-//        char[] buffer = new char[10];
-//        reader.read(buffer, 0, buffer.length);
-//        System.out.println(buffer);
-//        reader.close();
-//
-//        FileReader reader2 = new FileReader(readFileOpen);
-//        BufferedReader buffReader = new BufferedReader(reader2);
-//        String firstLine = buffReader.readLine();
-//        System.out.println(firstLine);
-//        String secondLine = buffReader.readLine();
-//        System.out.println(secondLine);
-//        buffReader.close();
 
-//        try{
-//            String fileName = "databases" + File.separator + "people.tab";
-//            File file = new File(fileName);
-//            FileReader fileReader = new FileReader(file);
-//            BufferedReader bufferedReader = new BufferedReader(fileReader);
-//            String line;
-//            //读取读取文件内容并打印
-//            while ((line = bufferedReader.readLine()) != null) {
-//                System.out.println(line);
-//            }
-//            bufferedReader.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+    public Boolean saveTableToFile(DBTable table){
+        String tablePath = getTablePath(table.getTableName());
+        File tableFileOpen = new File(tablePath);
+        try{
+            if(tableFileOpen.createNewFile()){
+                FileWriter tableFileWriter = new FileWriter(tableFileOpen);
+                tableFileWriter.write(table.columnsToString());
+                for (DBRow row : table.getRows()){
+                    tableFileWriter.write("\n" + row.toString());
+                }
+                tableFileWriter.flush();
+                tableFileWriter.close();
+                return true;
+            }
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+        }
+        return false;
+    }
 
+    public Boolean deleteTableFile(DBTable table){
+        String tablePath = getTablePath(table.getTableName());
+        File tableFileOpen = new File(tablePath);
+        return tableFileOpen.delete();
     }
 }
