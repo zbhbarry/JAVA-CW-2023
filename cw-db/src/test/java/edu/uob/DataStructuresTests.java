@@ -40,6 +40,8 @@ public class DataStructuresTests {
         assertEquals("1\tSimon\t65\tTRUE", table.getRows().get(0).toString());
         table.updateValue(0,1,"75");
         assertEquals("1\tSimon\t75\tTRUE", table.getRows().get(0).toString());
+        table.dropColumn("name");
+        table.dropColumn("nama");
         table.removeRow(0);
         assertEquals(table.getRows().size(),0);
     }

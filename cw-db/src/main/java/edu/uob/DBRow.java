@@ -10,6 +10,13 @@ public class DBRow {
         this.id = id;
         this.dataValues = dataValues;
     }
+    public void delDataValue(int index){
+        dataValues.remove(index);
+    }
+
+    public void addNull(){
+        dataValues.add(" ");
+    }
 
     public int getId() {
         return id;

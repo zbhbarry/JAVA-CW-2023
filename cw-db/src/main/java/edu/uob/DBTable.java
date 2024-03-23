@@ -1,5 +1,6 @@
 package edu.uob;
 
+import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
 
 public class DBTable {
@@ -36,6 +37,15 @@ public class DBTable {
             stringColumns.append(column.getColumnName());
         }
         return stringColumns.toString();
+    }
+
+    public String toString(){
+        StringBuilder result = new StringBuilder(columnsToString());
+        for(DBRow row: rows){
+            result.append("\n");
+            result.append(row.toString());
+        }
+        return result.toString();
     }
 
     public void compareColumn(){
@@ -76,8 +86,48 @@ public class DBTable {
     }
 
     public void dropColumn(String attr) {
+        if (attr.equals("id")){
+            throw new RuntimeException("Id is the primary key and cannot be deleted.");
+        }
+        int delIndex = -1;
+        for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++) {
+            if (attr.equalsIgnoreCase(columns.get(columnIndex).getColumnName())){
+                delIndex = columnIndex;
+                break;
+            }
+        }
+        if (delIndex == -1){
+            throw new RuntimeException("The column to be deleted does not exist.");
+        }
+        columns.remove(delIndex);
+        for(DBRow row : rows){
+            row.delDataValue(delIndex);
+        }
     }
 
+
+
     public void addColumn(String attr) {
+        if (attr.equals("id")){
+            throw new RuntimeException("Id is the primary key and cannot be added.");
+        }
+        for (DBColumn column : columns) {
+            if (attr.equalsIgnoreCase(column.getColumnName())) {
+                throw new RuntimeException("Cannot create column with the same name.");
+            }
+        }
+        columns.add(new DBColumn(attr));
+        for(DBRow row : rows){
+            row.addNull();
+        }
+    }
+
+    public int getNextId() {
+        if (rows.isEmpty()){
+            return 1;
+        }else
+        {
+            return rows.get(rows.size()-1).getId()+1;
+        }
     }
 }

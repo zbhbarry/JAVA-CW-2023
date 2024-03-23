@@ -1,13 +1,16 @@
 package edu.uob;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
 public class DBFile {
     private final String extension = ".tab";
-    private String root;
+    private String root = "databases";
     private String databaseFolder;
 
     public void setRoot(String root) {
@@ -121,28 +124,17 @@ public class DBFile {
                 table.addRow(row);
             }
         }catch(IOException ioe){
-            ioe.printStackTrace();
+            throw new RuntimeException("Table cannot be opened.");
         }
         return table;
     }
 
-    public Boolean saveTableToFile(DBTable table){
+    public void saveTableToFile(DBTable table){
         String tablePath = getTablePath(table.getTableName());
-        File tableFileOpen = new File(tablePath);
-        try{
-            if(tableFileOpen.createNewFile()){
-                FileWriter tableFileWriter = new FileWriter(tableFileOpen);
-                tableFileWriter.write(table.columnsToString());
-                for (DBRow row : table.getRows()){
-                    tableFileWriter.write("\n" + row.toString());
-                }
-                tableFileWriter.flush();
-                tableFileWriter.close();
-                return true;
-            }
-        }catch (IOException ioe){
-            ioe.printStackTrace();
+        try {
+            Files.write(Paths.get(tablePath), table.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException("Table cannot be saved.");
         }
-        return false;
     }
 }

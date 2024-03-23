@@ -1,19 +1,11 @@
 package edu.uob;
 
-import javax.swing.text.TabableView;
-import java.io.File;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.PropertyResourceBundle;
+import java.util.*;
 
 public class DBParser {
     private final ArrayList<String> keywords = new ArrayList<>(List.of("USE", "CREATE", "DATABASE", "TABLE",
             "DROP", "ALTER", "INSERT", "INTO", "VALUES", "SELECT", "FROM", "WHERE", "UPDATE", "SET", "DELETE", "JOIN",
-            "AND", "ON", "ADD", "TRUE", "FALSE", "NULL", "OR", "LIKE"));
+            "AND", "ON", "ADD", "NULL", "OR", "LIKE"));
     private ArrayList<String> tokens;
     private DBFile dbFile;
     private String message;
@@ -100,7 +92,7 @@ public class DBParser {
             dbFile.createTableFile(tbName, null);
             this.message = "[OK]";
         } else {
-            ArrayList<String> attrList = createAttributeListCommand();
+            ArrayList<String> attrList = attributeOrValueListCommand();
             if(endCommand()){
                 dbFile.createTableFile(tbName, attrList);
                 this.message = "[OK]";
@@ -109,7 +101,8 @@ public class DBParser {
             }
         }
     }
-    private ArrayList<String> createAttributeListCommand() {
+
+    private ArrayList<String> attributeOrValueListCommand() {
         ArrayList<String> attrList = new ArrayList<String>();
         boolean inList = true;
         if(!Objects.equals(getCurrentToken(), "(") || !Objects.equals(tokens.get(tokens.size() - 2), ")")){
@@ -192,12 +185,14 @@ public class DBParser {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.dropColumn(attr);
         dbFile.saveTableToFile(table);
+        this.message = "[OK]";
     }
 
     private void alterAddCommand(String tbName, String attr) {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.addColumn(attr);
         dbFile.saveTableToFile(table);
+        this.message = "[OK]";
     }
 
     private void insertCommand() {
@@ -212,12 +207,98 @@ public class DBParser {
         if(!getCurrentToken().equalsIgnoreCase("VALUES")){
             throw new IllegalArgumentException("Illegal command.");
         }
-
+        ArrayList<String> valueList = attributeOrValueListCommand();
+        DBTable table = dbFile.readTableFromFile(tbName);
+        if(endCommand()){
+            DBRow row = new DBRow(table.getNextId(), valueList);
+            table.addRow(row);
+            dbFile.saveTableToFile(table);
+            this.message = "[OK]";
+        }else {
+            throw new IllegalArgumentException("Illegal Command length or format.");
+        }
     }
-
     private void selectCommand() {
-
+//        dbFile.isUseDatabase();
+//        ArrayList<String> columnName = columnListCommand();
+//
+//        String tbName = getCurrentToken();
+//        System.out.println(tbName);
+//        if(!dbFile.isTableFile(tbName)){
+//            throw new IllegalArgumentException("Table doesn't existed.");
+//        }
+//        DBTable table = dbFile.readTableFromFile(tbName);
+//        ArrayList<Integer> columnsIndex, rowsIndex;
+//        columnsIndex = getColumnsIndex(table, columnName);
+//        if(endCommand()){
+//            this.message = "[OK]\n" + table.toString(columnsIndex, null);
+//        }else {
+//            if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+//                throw new IllegalArgumentException("Illegal command.");
+//            }
+//            ArrayList<String> conditions = condCommand();
+//            this.message = "[OK]\n" + table.toString(columnsIndex, rowsIndex);
+//        }
     }
+
+    private ArrayList<String> columnListCommand() {
+        ArrayList<String> attrList = new ArrayList<String>();
+        boolean inList = true;
+        String attr = getCurrentToken();
+        while (!Objects.equals(attr, "FROM") && !Objects.equals(attr, ";")){
+            if(inList){
+                isKeyWord(attr);
+                attrList.add(attr);
+                inList = false;
+            }else {
+                inList = true;
+                if(!Objects.equals(attr, ",")){
+                    throw new IllegalArgumentException("Attributes should be parted by , .");
+                }
+            }
+            attr = getCurrentToken();
+        }
+        if(attr.equals(";")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        System.out.println(attrList);
+        return attrList;
+    }
+
+    public Set<String> operater = new HashSet<>
+            (Arrays.asList("==" , ">" , "<" , ">=" , "<=" , "!=" , "LIKE"
+            ));
+    private ArrayList<String> condCommand() {
+        ArrayList<String> conditions = new ArrayList<String>();
+        String cond = getCurrentToken();
+        while (!Objects.equals(cond, ";")){
+            isKeyWord(cond);
+            if(cond.equals("(") || cond.equals(")")){
+                continue;
+            }
+            conditions.add(cond);
+            cond = getCurrentToken();
+        }
+        if(!cond.equals(";")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        if(conditions.size() == 3){
+            if(!operater.contains(conditions.get(1)) ){
+                throw new IllegalArgumentException("Wrong operator.");
+            }
+        }
+        if(conditions.size() == 7){
+            if(!operater.contains(conditions.get(1)) || !operater.contains(conditions.get(5)) ||
+                    (!conditions.get(3).equalsIgnoreCase("AND")
+                            && !conditions.get(3).equalsIgnoreCase("OR"))){
+                throw new IllegalArgumentException("Wrong operator.");
+            }
+        }
+        System.out.println(conditions);
+        return conditions;
+    }
+
+
 
     private void updateCommand() {
 
