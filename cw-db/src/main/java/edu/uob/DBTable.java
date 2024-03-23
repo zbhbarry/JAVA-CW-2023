@@ -2,6 +2,8 @@ package edu.uob;
 
 import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class DBTable {
     private String tableName;
@@ -60,6 +62,7 @@ public class DBTable {
                     line.add(columns.get(index).getColumnName());
                 }
             }
+            result.append(String.join("\t",line));
             for (DBRow row : rows) {
                 result.append("\n");
                 line = new ArrayList<>();
@@ -112,23 +115,32 @@ public class DBTable {
         this.rows.add(dbRow);
     }
 
-    public Boolean removeRow(int rowIndex){
+    public void removeRow(int rowIndex){
         if (rowIndex >= 0 && rowIndex < this.rows.size()) {
             this.rows.remove(rowIndex);
-            return true;
         } else {
-            return false;
+            throw new RuntimeException("Index out of the range.");
         }
     }
 
-    public Boolean updateValue(int rowIndex, int columnIndex, String value){
-        if (rowIndex >= 0 && rowIndex < this.rows.size() && columnIndex >= 0 && columnIndex < this.columns.size()) {
-            DBRow row = this.rows.get(rowIndex);
-            row.getDataValues().set(columnIndex, value);
-            this.rows.set(rowIndex, row);
-            return true;
-        } else {
-            return false;
+    public void removeRow(ArrayList<Integer> rowsIndex){
+        rowsIndex.sort((a, b) -> b - a);
+        for (int rowIndex : rowsIndex){
+            removeRow(rowIndex);
+        }
+    }
+
+    public void updateValue(int rowIndex, int columnIndex, String value){
+        DBRow row = this.rows.get(rowIndex);
+        row.getDataValues().set(columnIndex, value);
+        this.rows.set(rowIndex, row);
+    }
+
+    public void updateValue(ArrayList<Integer> columnsIndex, ArrayList<Integer> rowsIndex, String value){
+        for (int rowIndex: rowsIndex){
+            for (int columnIndex: columnsIndex){
+                updateValue(rowIndex,columnIndex, value);
+            }
         }
     }
 

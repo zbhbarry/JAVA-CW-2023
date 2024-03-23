@@ -5,7 +5,7 @@ import java.util.*;
 public class DBParser {
     private final ArrayList<String> keywords = new ArrayList<>(List.of("USE", "CREATE", "DATABASE", "TABLE",
             "DROP", "ALTER", "INSERT", "INTO", "VALUES", "SELECT", "FROM", "WHERE", "UPDATE", "SET", "DELETE", "JOIN",
-            "AND", "ON", "ADD", "NULL", "OR", "LIKE"));
+            "ON", "ADD", "NULL"));
     private ArrayList<String> tokens;
     private DBFile dbFile;
     private String message;
@@ -38,7 +38,6 @@ public class DBParser {
     private String getCurrentToken(){
         if (currentTokenIndex < tokens.size()){
             currentTokenIndex++;
-            System.out.println(tokens.get(currentTokenIndex-1));
             return tokens.get(currentTokenIndex-1);
         } else {
             throw new IllegalArgumentException("Illegal Command length or format.");
@@ -124,7 +123,6 @@ public class DBParser {
                 attr = getCurrentToken();
             }
         }
-        System.out.println(attrList);
         return attrList;
     }
 
@@ -187,12 +185,14 @@ public class DBParser {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.dropColumn(attr);
         dbFile.saveTableToFile(table);
+        this.message = "[OK]";
     }
 
     private void alterAddCommand(String tbName, String attr) {
         DBTable table = dbFile.readTableFromFile(tbName);
         table.addColumn(attr);
         dbFile.saveTableToFile(table);
+        this.message = "[OK]";
     }
 
     private void insertCommand() {
@@ -223,7 +223,6 @@ public class DBParser {
         ArrayList<String> columnName = columnListCommand();
 
         String tbName = getCurrentToken();
-        System.out.println(tbName);
         if(!dbFile.isTableFile(tbName)){
             throw new IllegalArgumentException("Table doesn't existed.");
         }
@@ -261,7 +260,6 @@ public class DBParser {
         if(attr.equals(";")){
             throw new IllegalArgumentException("Illegal command.");
         }
-        System.out.println(attrList);
         return attrList;
     }
 
@@ -273,18 +271,18 @@ public class DBParser {
         String cond = getCurrentToken();
         while (!Objects.equals(cond, ";")){
             isKeyWord(cond);
-            if(cond.equals("(") || cond.equals(")")){
-                continue;
-            }
+//            if(cond.equals("(") || cond.equals(")")){
+//                continue;
+//            }
             conditions.add(cond);
             cond = getCurrentToken();
         }
         if(!cond.equals(";")){
             throw new IllegalArgumentException("Illegal command.");
         }
-        if(endCommand()){
-            throw new IllegalArgumentException("Illegal command.");
-        }
+//        if(endCommand()){
+//            throw new IllegalArgumentException("Illegal command.");
+//        }
         if(conditions.size() == 3){
             if(!operater.contains(conditions.get(1)) ){
                 throw new IllegalArgumentException("Wrong operator.");
@@ -297,7 +295,6 @@ public class DBParser {
                 throw new IllegalArgumentException("Wrong operator.");
             }
         }
-        System.out.println(conditions);
         return conditions;
     }
 
@@ -445,52 +442,52 @@ public class DBParser {
     }
 
     private void updateCommand() {
-//        dbFile.isUseDatabase();
-//
-//        String tbName = getCurrentToken();
-//        System.out.println(tbName);
-//        if(!dbFile.isTableFile(tbName)){
-//            throw new IllegalArgumentException("Table doesn't existed.");
-//        }
-//        DBTable table = dbFile.readTableFromFile(tbName);
-//        if(!getCurrentToken().equalsIgnoreCase("SET")){
-//            throw new IllegalArgumentException("Illegal command.");
-//        }
-//        String attr = getCurrentToken();
-//        ArrayList<String> attrList = new ArrayList<>();
-//        attrList.add(attr);
-//        ArrayList<Integer> columnsIndex = getColumnsIndex(table, attrList);
-//
-//        if(!getCurrentToken().equalsIgnoreCase("=")){
-//            throw new IllegalArgumentException("Illegal command.");
-//        }
-//        String valNew = getCurrentToken();
-//        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
-//            throw new IllegalArgumentException("Illegal command.");
-//        }
-//        ArrayList<String> conditions = condCommand();
-//        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
-//        table.updateValue(columnsIndex, rowsIndex, valNew);
+        dbFile.isUseDatabase();
+
+        String tbName = getCurrentToken();
+        if(!dbFile.isTableFile(tbName)){
+            throw new IllegalArgumentException("Table doesn't existed.");
+        }
+        DBTable table = dbFile.readTableFromFile(tbName);
+        if(!getCurrentToken().equalsIgnoreCase("SET")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        String attr = getCurrentToken();
+        ArrayList<String> attrList = new ArrayList<>();
+        attrList.add(attr);
+        ArrayList<Integer> columnsIndex = getColumnsIndex(table, attrList);
+
+        if(!getCurrentToken().equalsIgnoreCase("=")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        String valNew = getCurrentToken();
+        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        ArrayList<String> conditions = condCommand();
+        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
+        table.updateValue(columnsIndex, rowsIndex, valNew);
+        dbFile.saveTableToFile(table);
         this.message = "[OK]";
     }
 
     private void deleteCommand() {
-//        dbFile.isUseDatabase();
-//        if(!getCurrentToken().equalsIgnoreCase("FROM")){
-//            throw new IllegalArgumentException("Illegal command.");
-//        }
-//        String tbName = getCurrentToken();
-//        System.out.println(tbName);
-//        if(!dbFile.isTableFile(tbName)){
-//            throw new IllegalArgumentException("Table doesn't existed.");
-//        }
-//        DBTable table = dbFile.readTableFromFile(tbName);
-//        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
-//            throw new IllegalArgumentException("Illegal command.");
-//        }
-//        ArrayList<String> conditions = condCommand();
-//        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
-//        table.removeRow(rowsIndex);
+        dbFile.isUseDatabase();
+        if(!getCurrentToken().equalsIgnoreCase("FROM")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        String tbName = getCurrentToken();
+        if(!dbFile.isTableFile(tbName)){
+            throw new IllegalArgumentException("Table doesn't existed.");
+        }
+        DBTable table = dbFile.readTableFromFile(tbName);
+        if(!getCurrentToken().equalsIgnoreCase("WHERE")){
+            throw new IllegalArgumentException("Illegal command.");
+        }
+        ArrayList<String> conditions = condCommand();
+        ArrayList<Integer> rowsIndex = getRowsIndex(table, conditions);
+        table.removeRow(rowsIndex);
+        dbFile.saveTableToFile(table);
         this.message = "[OK]";
     }
 

@@ -51,9 +51,7 @@ public class DBFile {
 
     public Boolean isTableFile(String tableName) {
         String tablePath = getTablePath(tableName);
-        System.out.println(tablePath);
         File tableFileOpen = new File(tablePath);
-        System.out.println(tableFileOpen.exists());
         return tableFileOpen.exists();
     }
 
@@ -108,7 +106,7 @@ public class DBFile {
         File tableFileOpen = new File(tablePath);
         try(BufferedReader tableReader = new BufferedReader(new FileReader(tableFileOpen))){
             String firstLine = tableReader.readLine();
-            String[] rawColumnNames = firstLine.split("[\t ]");
+            String[] rawColumnNames = firstLine.split("\t");
             ArrayList<DBColumn> columns = new ArrayList<>();
             for (String columnName : rawColumnNames) {
                 if (!columnName.equalsIgnoreCase("id")) {
@@ -118,7 +116,7 @@ public class DBFile {
             table.setColumns(columns);
             String currentLine;
             while ((currentLine = tableReader.readLine()) != null) {
-                String[] rowValues = currentLine.split("[\t ]");
+                String[] rowValues = currentLine.split("\t");
                 ArrayList<String> rowDataValues = new ArrayList<>(Arrays.asList(rowValues).subList(1, rowValues.length));
                 DBRow row = new DBRow(Integer.parseInt(rowValues[0]), rowDataValues);
                 table.addRow(row);
