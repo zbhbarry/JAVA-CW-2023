@@ -101,4 +101,38 @@ public class ExampleDBTests {
         assertFalse(response.contains("[OK]"), "An attempt was made to access a non-existent table, however an [OK] tag was returned");
     }
 
+    @Test
+    public void exampleTest(){
+        sendCommandToServer("CREATE DATABASE markbook;");
+        sendCommandToServer("USE markbook;");
+        sendCommandToServer("CREATE TABLE marks (name, mark, pass);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Simon', 65, TRUE);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Sion', 55, TRUE);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Rob', 35, FALSE);");
+        sendCommandToServer("INSERT INTO marks VALUES ('Chris', 20, FALSE);");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("SELECT * FROM marks WHERE name != 'Sion';");
+        sendCommandToServer("SELECT * FROM marks WHERE pass == TRUE;");
+        sendCommandToServer("UPDATE marks SET mark = 38 WHERE name == 'Chris';");
+        sendCommandToServer("SELECT * FROM marks WHERE name == 'Chris';");
+        sendCommandToServer("DELETE FROM marks WHERE name == 'Sion';");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("SELECT * FROM marks WHERE name LIKE 'i';");
+        sendCommandToServer("SELECT id FROM marks WHERE pass == FALSE;");
+        sendCommandToServer("SELECT name FROM marks WHERE mark>60;");
+        sendCommandToServer("DELETE FROM marks WHERE mark<40;");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("ALTER TABLE marks ADD age;");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("UPDATE marks SET age = 35 WHERE name == 'Simon';");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("ALTER TABLE marks DROP pass;");
+        sendCommandToServer("SELECT * FROM marks;");
+        sendCommandToServer("SELECT * FROM marks");
+        sendCommandToServer("SELECT * FROM crew;");
+        sendCommandToServer("SELECT height FROM marks WHERE name == 'Chris';");
+        sendCommandToServer("DROP TABLE marks;");
+        sendCommandToServer("DROP DATABASE markbook;");
+    }
+
 }
