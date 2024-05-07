@@ -1,14 +1,14 @@
 package edu.uob;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import com.alexmerz.graphviz.ParseException;
+import com.alexmerz.graphviz.Parser;
+import com.alexmerz.graphviz.objects.Graph;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public final class GameServer {
 
@@ -22,34 +22,45 @@ public final class GameServer {
     }
 
     /**
-    * Do not change the following method signature or we won't be able to mark your submission
-    * Instanciates a new server instance, specifying a game with some configuration files
-    *
-    * @param entitiesFile The game configuration file containing all game entities to use in your game
-    * @param actionsFile The game configuration file containing all game actions to use in your game
-    */
+     * Do not change the following method signature or we won't be able to mark your submission
+     * Instanciates a new server instance, specifying a game with some configuration files
+     *
+     * @param entitiesFile The game configuration file containing all game entities to use in your game
+     * @param actionsFile  The game configuration file containing all game actions to use in your game
+     */
     public GameServer(File entitiesFile, File actionsFile) {
-        // TODO implement your server logic here
+        try {
+            Parser entitiesParser = new Parser();
+            FileReader reader = new FileReader(entitiesFile);
+            entitiesParser.parse(reader);
+            Graph wholeDocument = entitiesParser.getGraphs().get(0);
+            ArrayList<Graph> sections = wholeDocument.getSubgraphs();
+            GameMap gameMap = new GameMap(sections);
+
+        } catch (FileNotFoundException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     /**
-    * Do not change the following method signature or we won't be able to mark your submission
-    * This method handles all incoming game commands and carries out the corresponding actions.</p>
-    *
-    * @param command The incoming command to be processed
-    */
+     * Do not change the following method signature or we won't be able to mark your submission
+     * This method handles all incoming game commands and carries out the corresponding actions.</p>
+     *
+     * @param command The incoming command to be processed
+     */
     public String handleCommand(String command) {
         // TODO implement your server logic here
         return "";
     }
 
     /**
-    * Do not change the following method signature or we won't be able to mark your submission
-    * Starts a *blocking* socket server listening for new connections.
-    *
-    * @param portNumber The port to listen on.
-    * @throws IOException If any IO related operation fails.
-    */
+     * Do not change the following method signature or we won't be able to mark your submission
+     * Starts a *blocking* socket server listening for new connections.
+     *
+     * @param portNumber The port to listen on.
+     * @throws IOException If any IO related operation fails.
+     */
     public void blockingListenOn(int portNumber) throws IOException {
         try (ServerSocket s = new ServerSocket(portNumber)) {
             System.out.println("Server listening on port " + portNumber);
@@ -64,19 +75,19 @@ public final class GameServer {
     }
 
     /**
-    * Do not change the following method signature or we won't be able to mark your submission
-    * Handles an incoming connection from the socket server.
-    *
-    * @param serverSocket The client socket to read/write from.
-    * @throws IOException If any IO related operation fails.
-    */
+     * Do not change the following method signature or we won't be able to mark your submission
+     * Handles an incoming connection from the socket server.
+     *
+     * @param serverSocket The client socket to read/write from.
+     * @throws IOException If any IO related operation fails.
+     */
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
         try (Socket s = serverSocket.accept();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
+             BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
             System.out.println("Connection established");
             String incomingCommand = reader.readLine();
-            if(incomingCommand != null) {
+            if (incomingCommand != null) {
                 System.out.println("Received message from " + incomingCommand);
                 String result = handleCommand(incomingCommand);
                 writer.write(result);
