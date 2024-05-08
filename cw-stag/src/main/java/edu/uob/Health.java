@@ -1,6 +1,7 @@
 package edu.uob;
 
 import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class Health {
     private static final int MAX_HEALTH = 3;
@@ -11,7 +12,7 @@ public class Health {
     }
 
     public void addHealth() {
-        this.health = max(this.health + 1, MAX_HEALTH);
+        this.health = min(this.health + 1, MAX_HEALTH);
     }
 
     public int getHealth() {
