@@ -8,6 +8,6 @@ public class ActionHealth extends ActionBuiltIn {
 
     @Override
     public String execute(Player player, String artefact, GameMap map) {
-        return null;
+        return "Your health is: " + player.getHealth() + ".";
     }
 }

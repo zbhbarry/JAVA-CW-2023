@@ -7,6 +7,12 @@ public class ActionGoTo extends ActionBuiltIn {
 
     @Override
     public String execute(Player player, String destination, GameMap map) {
-        return null;
+        Location newLocation = player.getCurrentLocation().getPath(destination);
+        if (newLocation != null) {
+            player.setLocation(newLocation);
+            return "You moved to " + destination + ".";
+        } else {
+            return "Path to " + destination + " not found.";
+        }
     }
 }

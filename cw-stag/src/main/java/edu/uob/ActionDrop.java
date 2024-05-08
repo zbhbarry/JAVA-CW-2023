@@ -7,6 +7,12 @@ public class ActionDrop extends ActionBuiltIn {
 
     @Override
     public String execute(Player player, String artefact, GameMap map) {
-        return null;
+        Artefact droppedArtefact = player.getInventory().removeArtefact(artefact);
+        if (droppedArtefact != null) {
+            player.getCurrentLocation().addArtefact(droppedArtefact);
+            return "You dropped " + droppedArtefact.getName() + ".";
+        } else {
+            return "Artefact not found in your inventory.";
+        }
     }
 }
