@@ -3,16 +3,28 @@ package edu.uob;
 import com.alexmerz.graphviz.ParseException;
 import com.alexmerz.graphviz.Parser;
 import com.alexmerz.graphviz.objects.Graph;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.swing.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public final class GameServer {
 
     private static final char END_OF_TRANSMISSION = 4;
+    private Players players;
+    private GameMap map;
+    private ActionsTable actionsTab;
 
     public static void main(String[] args) throws IOException {
         File entitiesFile = Paths.get("config" + File.separator + "basic-entities.dot").toAbsolutePath().toFile();
@@ -35,9 +47,17 @@ public final class GameServer {
             entitiesParser.parse(reader);
             Graph wholeDocument = entitiesParser.getGraphs().get(0);
             ArrayList<Graph> sections = wholeDocument.getSubgraphs();
-            GameMap gameMap = new GameMap(sections);
+            this.map = new GameMap(sections);
 
-        } catch (FileNotFoundException | ParseException e) {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(actionsFile);
+            Element root = document.getDocumentElement();
+            NodeList actions = root.getElementsByTagName("action");  // Get all action elements
+            this.actionsTab = new ActionsTable(actions);
+
+            players = new Players();
+
+        } catch (ParseException | ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -50,8 +70,24 @@ public final class GameServer {
      * @param command The incoming command to be processed
      */
     public String handleCommand(String command) {
-        // TODO implement your server logic here
-        return "";
+        String[] parts = command.split(":", 2); // Splitting at the first colon
+        String username = parts[0].trim().toLowerCase();
+        String actionWords = parts[1].trim().toLowerCase();
+
+        // Check if the player exists or create a new one
+        Player player = players.getPlayer(username);
+        if (player == null) {
+            player = new Player(username, "A new adventurer " + username + ".", this.map.getStartLocation());
+            players.addPlayer(username, player);
+        }
+
+        // Handle the actual command
+        try {
+            ActionWords playerAction = this.actionsTab.interpret(actionWords, player, this.map.getEntriesAll());
+            return player.act(playerAction, this.map);
+        } catch (Exception e) {
+            return "ERROR: " + e.getMessage();
+        }
     }
 
     /**
@@ -82,9 +118,7 @@ public final class GameServer {
      * @throws IOException If any IO related operation fails.
      */
     private void blockingHandleConnection(ServerSocket serverSocket) throws IOException {
-        try (Socket s = serverSocket.accept();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
+        try (Socket s = serverSocket.accept(); BufferedReader reader = new BufferedReader(new InputStreamReader(s.getInputStream())); BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
             System.out.println("Connection established");
             String incomingCommand = reader.readLine();
             if (incomingCommand != null) {

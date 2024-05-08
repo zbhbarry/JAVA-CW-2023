@@ -1,6 +1,8 @@
 package edu.uob;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class Inventory {
@@ -20,5 +22,16 @@ public class Inventory {
 
     public ArrayList<Artefact> showArtefacts() {
         return new ArrayList<>(this.artefacts.values());
+    }
+
+    public Set<String> showArtefactsName() {
+        return this.artefacts.keySet();
+    }
+
+    public Artefact removeArtefact(String artefact) {
+        if (this.artefacts.containsKey(artefact)) {
+            return this.artefacts.remove(artefact);
+        }
+        return null;
     }
 }
